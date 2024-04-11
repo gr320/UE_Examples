@@ -9,10 +9,11 @@
 #include "LevelEditor.h"
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
-#include "Internationalization/Culture.h"
+#include "Interfaces/IMainFrameModule.h"
 #include "Kismet/KismetInternationalizationLibrary.h"
+#include "Kismet2/DebuggerCommands.h"
+#include "Toolbars/MainMenuToolbar.h"
 
-static const FName ArtistToolsEdTabName("ArtistToolsEd");
 
 #define LOCTEXT_NAMESPACE "FArtistToolsEdModule"
 
@@ -22,14 +23,36 @@ void FArtistToolsEdModule::StartupModule()
 	
 	FArtistToolsEdStyle::Initialize();
 	FArtistToolsEdStyle::ReloadTextures();
-
 	FArtistToolsEdCommands::Register();
-	BindCommands();
-	RegisterSettings();
-	RegisterMenus();
-	PluginCommands = MakeShareable(new FUICommandList);
 
 	
+	/*
+	// LevelEditor 获取的 CommandList 快捷键,在视口内不可用.
+	const FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+	TSharedRef<FUICommandList> CommandList = LevelEditorModule.GetGlobalLevelEditorActions();
+	MainMenuToolbar = MakeShareable(new FMainMenuToolbar(CommandList));
+	*/
+	
+	MainMenuToolbar = MakeShareable(new FMainMenuToolbar);
+	
+	
+	FCoreDelegates::OnPostEngineInit.AddRaw(this, &FArtistToolsEdModule::OnPostEngineInit);
+
+}
+//引擎初始化完毕
+void FArtistToolsEdModule::OnPostEngineInit()
+{
+	if (!GEditor)
+	{
+		// Loading MainFrame module with '-game' is not supported
+		return;
+	}
+	RegisterSettings();
+	
+	MainMenuToolbar->Initialize();
+
+	IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
+	MainFrameModule.OnMainFrameCreationFinished().AddRaw(this, &FArtistToolsEdModule::OnMainFrameCreationFinished);
 }
 
 void FArtistToolsEdModule::ShutdownModule()
@@ -38,6 +61,12 @@ void FArtistToolsEdModule::ShutdownModule()
 	// we call this function before unloading the module.
 
 	UnregisterSettings();
+
+	if (GIsEditor)
+	{
+		FArtistToolsEdStyle::Shutdown();
+	}
+	
 	UToolMenus::UnRegisterStartupCallback(this);
 
 	UToolMenus::UnregisterOwner(this);
@@ -47,128 +76,15 @@ void FArtistToolsEdModule::ShutdownModule()
 	FArtistToolsEdCommands::Unregister();
 }
 
-void FArtistToolsEdModule::RegisterMenus()
-{
-	// Owner will be used for cleanup in call to UToolMenus::UnregisterOwner
-	FToolMenuOwnerScoped OwnerScoped(this);
-
-	auto OnGetToolbarButtonBrushLambda = [this]() -> const FSlateIcon
-	{
-		//可以根据状态获取Icon
-		return FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(),"ArtistTools.ArtistToolsLogo");
-	};
-	
-	{
-		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-		{
-			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
-			Section.AddMenuEntryWithCommandList(FArtistToolsEdCommands::Get().ArtistToolsEditor, PluginCommands);
-		}
-	}
-
-	{
-		//工具栏中添加按键.
-		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
-		{
-			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("ArtistToolsEditor");
-			{
-
-				Section.AddDynamicEntry(ArtistToolsEdTabName, FNewToolMenuSectionDelegate::CreateLambda([&](FToolMenuSection& InDynamicSection)
-				{
-					InDynamicSection.AddEntry(FToolMenuEntry::InitToolBarButton(
-								ArtistToolsEdTabName,
-								FUIAction(FExecuteAction::CreateRaw(this,&FArtistToolsEdModule::OnToolBarClick)),
-								LOCTEXT("ArtistToolsEditor", "ArtistTools Editor"),
-								LOCTEXT("ArtistToolsEditorTip", "ArtistTools Editor Tip."),
-								TAttribute<FSlateIcon>::Create(OnGetToolbarButtonBrushLambda)
-					));
-					//构建下拉框.
-					InDynamicSection.AddEntry(FToolMenuEntry::InitComboButton(
-						"ADTools ComboMenu",
-						FUIAction(),
-						FOnGetContent::CreateRaw(this,&FArtistToolsEdModule::GenerateComboMenu, PluginCommands),
-						LOCTEXT("LaunchCombo_Label", "ADTools Options"),
-						LOCTEXT("ComboToolTip", "Options for ADTools"),
-						FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(), "ArtistTools.ArtistToolsLogo"),
-						true
-					));
-					
-				}));
-			}
-		}
-	}
-}
-
-//创建下拉菜单
-TSharedRef<SWidget> FArtistToolsEdModule::GenerateComboMenu(TSharedPtr<FUICommandList> InCommands) const
-{
-	//注册UWEditorButton
-	//UToolMenus::Get()->RegisterMenu("LevelEditor.LevelEditorToolBar.ArtistToolsEdButton");
-
-	//构建 MenuBuilder
-	FMenuBuilder MenuBuilder(true, InCommands);
-
-	MenuBuilder.BeginSection("ArtistToolsMenu", TAttribute<FText>(FText::FromString("ArtistToolsMenu")));
-
-	
-	MenuBuilder.AddMenuEntry(FArtistToolsEdCommands::Get().Settings);
-	MenuBuilder.AddMenuEntry(FArtistToolsEdCommands::Get().SwitchLanguage);
-	MenuBuilder.AddMenuSeparator();
-	MenuBuilder.AddMenuEntry(FArtistToolsEdCommands::Get().RestartEditor);
-	MenuBuilder.AddMenuSeparator();
-	MenuBuilder.AddMenuEntry(FArtistToolsEdCommands::Get().Github);
-	MenuBuilder.EndSection();
-	
-	return MenuBuilder.MakeWidget();
-}
-void FArtistToolsEdModule::BindCommands()
-{
-	check(!PluginCommands.IsValid());
-
-	const FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	PluginCommands = LevelEditorModule.GetGlobalLevelEditorActions();
-	
-	const FArtistToolsEdCommands& Commands = FArtistToolsEdCommands::Get();
-	FUICommandList& ActionList = *PluginCommands;
-
-
-	ActionList.MapAction(
-				FArtistToolsEdCommands::Get().Settings,
-				FExecuteAction::CreateRaw(this, &FArtistToolsEdModule::OpenSettings),
-				FCanExecuteAction());
-
-	ActionList.MapAction(
-			FArtistToolsEdCommands::Get().ArtistToolsEditor,
-			FExecuteAction::CreateRaw(this, &FArtistToolsEdModule::OnToolBarClick),
-			FCanExecuteAction());
-	ActionList.MapAction(
-		Commands.SwitchLanguage,
-		FExecuteAction::CreateRaw(this,&FArtistToolsEdModule::LangSwitcher),
-		FCanExecuteAction());
-
-	//重启按键
-	ActionList.MapAction(
-		Commands.RestartEditor,
-		FExecuteAction::CreateRaw(this, &FArtistToolsEdModule::RestartEditor),
-		FCanExecuteAction());
-	//打开链接地址
-	ActionList.MapAction(
-		Commands.Github,
-		FExecuteAction::CreateRaw(this, &FArtistToolsEdModule::OpenGitHubUrl),
-		FCanExecuteAction());
-
-	
-	//AddPIEPreviewDeviceActions(Commands, ActionList);
-}
 //注册设置信息
 void FArtistToolsEdModule::RegisterSettings()
 {
 	ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
 	if (SettingsModule != nullptr)
 	{
-		const ISettingsSectionPtr SettingsSection = SettingsModule->RegisterSettings("Project", "Plugins", ArtistToolsEdTabName,
-			LOCTEXT("AdToolsSetting", "ADTools"),
-			LOCTEXT("AdToolsSettingDescription", "Configure the ADTools plug-in."),
+		const ISettingsSectionPtr SettingsSection = SettingsModule->RegisterSettings("Project", "Plugins", FMainMenuToolbar::ArtistToolsEdTabName,
+			LOCTEXT("ArtistTools", "Artist Tools"),
+			LOCTEXT("ArtistToolsDescription", "Configure the Artist Tools plug-in."),
 			GetMutableDefault<UArtistToolsSettings>()
 		);
 		
@@ -179,59 +95,31 @@ void FArtistToolsEdModule::RegisterSettings()
 
 	}
 }
+
 //卸载设置信息
 void FArtistToolsEdModule::UnregisterSettings()
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
-		SettingsModule->UnregisterSettings("Project", "Plugins", ArtistToolsEdTabName);
+		SettingsModule->UnregisterSettings("Project", "Plugins", FMainMenuToolbar::ArtistToolsEdTabName);
 
 	}
 }
-
-void FArtistToolsEdModule::OnToolBarClick()
-{
-	UE_LOG(LogTemp,Warning,TEXT("OnToolBarClick"))
-}
-
-//打开设置界面
-void FArtistToolsEdModule::OpenSettings() const
-{
-
-	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
-	{
-		SettingsModule->ShowViewer("Project", "Plugins", ArtistToolsEdTabName);
-	}
-
-}
-//设置信息发生变压
+//设置信息发生变化
 bool FArtistToolsEdModule::HandleSettingsSaved() const
 {
 	return true;
 }
-//重启编辑器
-void FArtistToolsEdModule::RestartEditor() const
+
+void FArtistToolsEdModule::OnMainFrameCreationFinished(TSharedPtr<SWindow> InRootWindow, bool bIsNewProjectWindow)
 {
-	//重启编辑器
-	FUnrealEdMisc::Get().RestartEditor((true));
+	//注册切换语言快捷键....
+	FPlayWorldCommands::GlobalPlayWorldActions->MapAction(
+		FArtistToolsEdCommands::Get().SwitchLanguage, FExecuteAction::CreateStatic(FMainMenuToolbar::LangSwitcher), FCanExecuteAction()
+   );
 }
-//中英文切换
-void FArtistToolsEdModule::LangSwitcher() const
-{
-	//中英文切换
-	if(UKismetInternationalizationLibrary::GetCurrentLanguage() == "zh-hans")
-	{
-		UKismetInternationalizationLibrary::SetCurrentLanguage("en",true);
-	}
-	else
-	{
-		UKismetInternationalizationLibrary::SetCurrentLanguage("zh-hans",true);
-	}
-}
-void FArtistToolsEdModule::OpenGitHubUrl() const
-{
-	FPlatformProcess::LaunchURL(TEXT("https://github.com/wzxdev/ADTools"), nullptr, nullptr);
-}
+
+
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FArtistToolsEdModule, ArtistToolsEd)

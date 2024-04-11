@@ -16,32 +16,24 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	
-	/** This function will be bound to Command. */
-	void PluginButtonClicked();
 	
 private:
 
-	void RegisterMenus();
+	
 	//注册设置信息
 	void RegisterSettings();
 	//卸载设置信息
 	void UnregisterSettings();
-	//创建下拉菜单
-	TSharedRef<SWidget> GenerateComboMenu(TSharedPtr<FUICommandList> InCommands) const;
-	void BindCommands();
-
-	void OnToolBarClick();
-	//打开设置界面
-	void OpenSettings() const;
-	//设置信息发生变压
+	//设置信息发生变化
 	bool HandleSettingsSaved() const;
-	//重启编辑器
-	void RestartEditor() const;
-	//中英文切换
-	void LangSwitcher() const;
-	void OpenGitHubUrl() const;
+	
+	void OnMainFrameCreationFinished(TSharedPtr<SWindow> InRootWindow, bool bIsNewProjectWindow);
+	
 
 private:
+	TSharedPtr<class FMainMenuToolbar> MainMenuToolbar;
 	TSharedPtr<class FUICommandList> PluginCommands;
+	//引擎初始化完毕
+	void OnPostEngineInit();
 	
 };
