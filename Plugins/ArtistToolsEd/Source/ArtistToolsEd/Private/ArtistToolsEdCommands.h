@@ -21,10 +21,13 @@ public:
 public:
 
 	TSharedPtr< FUICommandInfo > ArtistToolsEditor;
-	TSharedPtr< FUICommandInfo > RunSettings;
-	TSharedPtr< FUICommandInfo > EditSettings;
+	TSharedPtr< FUICommandInfo > OpenSettings;
 	TSharedPtr< FUICommandInfo > RestartEditor;
 	TSharedPtr< FUICommandInfo > SwitchLanguage;
 	TSharedPtr< FUICommandInfo > Github;
 	TSharedPtr< FUICommandInfo > About;
+
+	TSharedPtr< FUICommandInfo > LanguageCN;
+	TSharedPtr< FUICommandInfo > LanguageEN;
+	
 };

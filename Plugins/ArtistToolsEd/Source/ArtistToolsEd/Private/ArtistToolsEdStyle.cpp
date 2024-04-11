@@ -44,9 +44,11 @@ TSharedRef< FSlateStyleSet > FArtistToolsEdStyle::Create()
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ArtistToolsEd")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("ArtistToolsEd.ArtistToolsLogo", new IMAGE_BRUSH_SVG(TEXT("Icons/Logo_Blue"), Icon20x20));
-	Style->Set("ArtistToolsEd.RunSettings", new IMAGE_BRUSH_SVG(TEXT("Icons/Settings"), Icon20x20));
-	Style->Set("ArtistToolsEd.EditSettings", new IMAGE_BRUSH_SVG(TEXT("Icons/Settings"), Icon20x20));
+	Style->Set("ArtistToolsEd.OpenSettings", new IMAGE_BRUSH_SVG(TEXT("Icons/Settings"), Icon20x20));
 	Style->Set("ArtistToolsEd.SwitchLanguage", new IMAGE_BRUSH_SVG(TEXT("Icons/SwitchLanguage"), Icon20x20));
+	Style->Set("ArtistToolsEd.Language", new IMAGE_BRUSH_SVG(TEXT("Icons/SwitchLanguage"), Icon20x20));
+	Style->Set("ArtistToolsEd.LanguageCN", new IMAGE_BRUSH_SVG(TEXT("Icons/flag_ch"), Icon20x20));
+	Style->Set("ArtistToolsEd.LanguageEN", new IMAGE_BRUSH_SVG(TEXT("Icons/flag_us"), Icon20x20));
 	Style->Set("ArtistToolsEd.Github", new IMAGE_BRUSH_SVG(TEXT("Icons/Github"), Icon20x20));
 	Style->Set("ArtistToolsEd.RestartEditor", new IMAGE_BRUSH_SVG(TEXT("Icons/Restart"), Icon20x20));
 	Style->Set("ArtistToolsEd.About", new IMAGE_BRUSH_SVG(TEXT("Icons/About"), Icon20x20));

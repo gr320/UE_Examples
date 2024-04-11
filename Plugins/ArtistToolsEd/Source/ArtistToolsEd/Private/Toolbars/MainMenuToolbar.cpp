@@ -133,20 +133,45 @@ void FMainMenuToolbar::BindCommands()
 
 	//切换语言.
     CommandList->MapAction(FArtistToolsEdCommands::Get().SwitchLanguage, FExecuteAction::CreateStatic(FMainMenuToolbar::LangSwitcher), FCanExecuteAction());
-    //打开设置
-    CommandList->MapAction(FArtistToolsEdCommands::Get().RunSettings, FExecuteAction::CreateLambda([]
-    {
-        if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
-        {
-            SettingsModule->ShowViewer("Project", "Project", "Maps");
-        }
-    }), FCanExecuteAction());
+	
+	
+	CommandList->MapAction(FArtistToolsEdCommands::Get().LanguageEN,
+		FUIAction(FExecuteAction::CreateLambda([]()
+		{
+			if (UKismetInternationalizationLibrary::GetCurrentLanguage() !="en")
+			{
+				UKismetInternationalizationLibrary::SetCurrentLanguage("en",true);
+			}
+			
+		}),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateLambda([]()
+		{
+			return UKismetInternationalizationLibrary::GetCurrentLanguage() =="en";
+		})
+	));
+	CommandList->MapAction(FArtistToolsEdCommands::Get().LanguageCN, FUIAction(FExecuteAction::CreateLambda([]()
+		{
+			if (UKismetInternationalizationLibrary::GetCurrentLanguage() !="zh-hans")
+			{
+				UKismetInternationalizationLibrary::SetCurrentLanguage("zh-hans",true);
+			}
+			
+		}),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateLambda([]()
+		{
+			
+			return UKismetInternationalizationLibrary::GetCurrentLanguage() =="zh-hans";
+		})
+	));
 
 	//打开设置
-	CommandList->MapAction(FArtistToolsEdCommands::Get().EditSettings, FExecuteAction::CreateLambda([]
+	CommandList->MapAction(FArtistToolsEdCommands::Get().OpenSettings, FExecuteAction::CreateLambda([]
 	{
 		if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 		{
+			// SettingsModule->ShowViewer("Project", "Project", "Maps");
 			SettingsModule->ShowViewer("Project", "Plugins", "ArtistToolsEd");
 		}
 	}), FCanExecuteAction());
@@ -202,20 +227,20 @@ TSharedRef<SWidget> FMainMenuToolbar::GenerateComboMenu() const
 	//Section ArtistTools
 	MenuBuilder.BeginSection("ArtistTools", TAttribute<FText>(FText::FromString("Artist Tools")));
 	MenuBuilder.AddMenuEntry(Commands.SwitchLanguage);
+	MenuBuilder.AddSubMenu(LOCTEXT("Sectiono_Language","Language"),LOCTEXT("Sectiono_Language","Language"),
+		FNewMenuDelegate::CreateLambda([Commands](FMenuBuilder& SubMenuBuilder)
+		{
+			SubMenuBuilder.AddMenuEntry(Commands.LanguageCN);
+			SubMenuBuilder.AddMenuEntry(Commands.LanguageEN);
+		}),false,FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(),"ArtistToolsEd.Language"));
+	
 	MenuBuilder.AddMenuSeparator();//添加一条横线
 	MenuBuilder.AddMenuEntry(Commands.RestartEditor);
 	MenuBuilder.EndSection();
 	
 	//Section Settings
 	MenuBuilder.BeginSection("Settings", TAttribute<FText>(FText::FromString("Settings")));
-	MenuBuilder.AddSubMenu(LOCTEXT("Section_SettingsMenu", "Settings"),
-		LOCTEXT("Section_SettingsMenu_ToolTip", "ArtistTools Settings"),
-		FNewMenuDelegate::CreateLambda([Commands](FMenuBuilder& SubMenuBuilder)
-		{
-			SubMenuBuilder.AddMenuEntry(Commands.RunSettings, NAME_None, LOCTEXT("OpenRuntimeSettings", "Runtime"));
-			SubMenuBuilder.AddMenuEntry(Commands.EditSettings, NAME_None, LOCTEXT("OpenEditorSettings", "Editor"));
-			
-		}),false,FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(), "ArtistToolsEd.EditSettings"));
+	MenuBuilder.AddMenuEntry(Commands.OpenSettings);
 	MenuBuilder.EndSection();
 	
 	//Section About

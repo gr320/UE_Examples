@@ -48,7 +48,7 @@ void FArtistToolsEdModule::OnPostEngineInit()
 		return;
 	}
 	RegisterSettings();
-	
+	//初始化工具栏
 	MainMenuToolbar->Initialize();
 
 	IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
