@@ -71,8 +71,6 @@ void FArtistToolsEdModule::ShutdownModule()
 
 	UToolMenus::UnregisterOwner(this);
 
-	FArtistToolsEdStyle::Shutdown();
-
 	FArtistToolsEdCommands::Unregister();
 }
 
