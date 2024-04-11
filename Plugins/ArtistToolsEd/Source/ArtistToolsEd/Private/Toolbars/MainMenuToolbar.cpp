@@ -227,10 +227,13 @@ TSharedRef<SWidget> FMainMenuToolbar::GenerateComboMenu() const
 	//Section ArtistTools
 	MenuBuilder.BeginSection("ArtistTools", TAttribute<FText>(FText::FromString("Artist Tools")));
 	MenuBuilder.AddMenuEntry(Commands.SwitchLanguage);
+	//添加子菜单
 	MenuBuilder.AddSubMenu(LOCTEXT("Sectiono_Language","Language"),LOCTEXT("Sectiono_Language","Language"),
 		FNewMenuDelegate::CreateLambda([Commands](FMenuBuilder& SubMenuBuilder)
 		{
+			//中文
 			SubMenuBuilder.AddMenuEntry(Commands.LanguageCN);
+			//英文
 			SubMenuBuilder.AddMenuEntry(Commands.LanguageEN);
 		}),false,FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(),"ArtistToolsEd.Language"));
 	
