@@ -224,8 +224,14 @@ TSharedRef<SWidget> FMainMenuToolbar::GenerateComboMenu() const
     const FArtistToolsEdCommands& Commands = FArtistToolsEdCommands::Get();
     FMenuBuilder MenuBuilder(true, CommandList);
 
+	FName ExtensionHook = NAME_None;
 	//Section ArtistTools
-	MenuBuilder.BeginSection("ArtistTools", TAttribute<FText>(FText::FromString("Artist Tools")));
+	MenuBuilder.BeginSection(ExtensionHook, TAttribute<FText>(FText::FromString("Artist Tools")));
+	MenuBuilder.AddMenuEntry(Commands.RestartEditor);
+	MenuBuilder.EndSection();
+
+	
+	MenuBuilder.BeginSection(ExtensionHook, TAttribute<FText>(FText::FromString("Language")));
 	MenuBuilder.AddMenuEntry(Commands.SwitchLanguage);
 	//添加子菜单
 	MenuBuilder.AddSubMenu(LOCTEXT("Sectiono_Language","Language"),LOCTEXT("Sectiono_Language","Language"),
@@ -237,17 +243,17 @@ TSharedRef<SWidget> FMainMenuToolbar::GenerateComboMenu() const
 			SubMenuBuilder.AddMenuEntry(Commands.LanguageEN);
 		}),false,FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(),"ArtistToolsEd.Language"));
 	
-	MenuBuilder.AddMenuSeparator();//添加一条横线
-	MenuBuilder.AddMenuEntry(Commands.RestartEditor);
+	//MenuBuilder.AddMenuSeparator();//添加一条横线
+	
 	MenuBuilder.EndSection();
 	
 	//Section Settings
-	MenuBuilder.BeginSection("Settings", TAttribute<FText>(FText::FromString("Settings")));
+	MenuBuilder.BeginSection(ExtensionHook, TAttribute<FText>(FText::FromString("Settings")));
 	MenuBuilder.AddMenuEntry(Commands.OpenSettings);
 	MenuBuilder.EndSection();
 	
 	//Section About
-	MenuBuilder.BeginSection("About", TAttribute<FText>(FText::FromString("About")));
+	MenuBuilder.BeginSection(ExtensionHook, TAttribute<FText>(FText::FromString("About")));
 	MenuBuilder.AddMenuEntry(Commands.Github);
 	MenuBuilder.AddMenuEntry(Commands.About);
 	MenuBuilder.EndSection();
