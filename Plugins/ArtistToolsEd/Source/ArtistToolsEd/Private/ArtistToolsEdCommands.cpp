@@ -16,6 +16,9 @@ void FArtistToolsEdCommands::RegisterCommands()
 	UI_COMMAND(About, "About", "Open About Site", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(LanguageCN, "zh-CN", "Chinese", EUserInterfaceActionType::RadioButton, FInputChord());
 	UI_COMMAND(LanguageEN, "en-US", "English", EUserInterfaceActionType::RadioButton, FInputChord());
+
+	UI_COMMAND(Launcher, "Launcher", "Launcher", EUserInterfaceActionType::Button, FInputChord());
+	
 }
 
 #undef LOCTEXT_NAMESPACE

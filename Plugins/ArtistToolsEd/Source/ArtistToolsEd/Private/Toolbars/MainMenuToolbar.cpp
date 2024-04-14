@@ -5,6 +5,8 @@
 #include "Interfaces/IMainFrameModule.h"
 #include "ToolMenus.h"
 #include "Kismet/KismetInternationalizationLibrary.h"
+#include "SlateUI/About/AboutWidget.h"
+#include "SlateUI/Lanucher/ArtistToolsLauncherWindow.h"
 
 
 #define LOCTEXT_NAMESPACE "ArtistToolsMainMenuToolbar"
@@ -27,6 +29,9 @@ void FMainMenuToolbar::Initialize()
 	
     // Owner will be used for cleanup in call to UToolMenus::UnregisterOwner
 	FToolMenuOwnerScoped OwnerScoped(this);
+
+	RegisterTabSpawners();
+
 	
 	{
     	//Window 下拉列表中添加.
@@ -124,6 +129,10 @@ void FMainMenuToolbar::Initialize()
 void FMainMenuToolbar::BindCommands()
 {
 
+	
+	//Launcher
+	CommandList->MapAction(FArtistToolsEdCommands::Get().Launcher, FExecuteAction::CreateRaw(this,&FMainMenuToolbar::OpenLauncher), FCanExecuteAction());
+
 	//重启编辑器
 	CommandList->MapAction(FArtistToolsEdCommands::Get().RestartEditor, FExecuteAction::CreateLambda([]
     {
@@ -152,9 +161,9 @@ void FMainMenuToolbar::BindCommands()
 	));
 	CommandList->MapAction(FArtistToolsEdCommands::Get().LanguageCN, FUIAction(FExecuteAction::CreateLambda([]()
 		{
-			if (UKismetInternationalizationLibrary::GetCurrentLanguage() !="zh-hans")
+			if (UKismetInternationalizationLibrary::GetCurrentLanguage() !="zh-Hans")
 			{
-				UKismetInternationalizationLibrary::SetCurrentLanguage("zh-hans",true);
+				UKismetInternationalizationLibrary::SetCurrentLanguage("zh-Hans",true);
 			}
 			
 		}),
@@ -162,7 +171,7 @@ void FMainMenuToolbar::BindCommands()
 		FIsActionChecked::CreateLambda([]()
 		{
 			
-			return UKismetInternationalizationLibrary::GetCurrentLanguage() =="zh-hans";
+			return UKismetInternationalizationLibrary::GetCurrentLanguage() =="zh-Hans";
 		})
 	));
 
@@ -202,9 +211,7 @@ void FMainMenuToolbar::BindCommands()
             .SupportsMaximize(false).SupportsMinimize(false)
             .SizingRule(ESizingRule::FixedSize)
             [
-                SNew(STextBlock)
-                .Text(LOCTEXT("AboutText", "About Text"))
-                .ToolTipText(LOCTEXT("AboutTextTooltip", "AboutText Tooltip"))
+                SNew(SAboutWidget)
             ];
 
         IMainFrameModule& MainFrame = FModuleManager::LoadModuleChecked<IMainFrameModule>("MainFrame");
@@ -227,6 +234,7 @@ TSharedRef<SWidget> FMainMenuToolbar::GenerateComboMenu() const
 	FName ExtensionHook = NAME_None;
 	//Section ArtistTools
 	MenuBuilder.BeginSection(ExtensionHook, TAttribute<FText>(FText::FromString("Artist Tools")));
+	MenuBuilder.AddMenuEntry(Commands.Launcher);
 	MenuBuilder.AddMenuEntry(Commands.RestartEditor);
 	MenuBuilder.EndSection();
 
@@ -267,18 +275,46 @@ void FMainMenuToolbar::OnToolBarClick()
 	UE_LOG(LogTemp,Warning,TEXT("OnToolBarClick"))
 }
 
+void FMainMenuToolbar::OpenLauncher()
+{
+	FGlobalTabmanager::Get()->TryInvokeTab(FTabId("Launcher"));
+}
+
+void FMainMenuToolbar::RegisterTabSpawners()
+{
+
+	FGlobalTabmanager::Get()->RegisterTabSpawner("Launcher", FOnSpawnTab::CreateLambda([](const FSpawnTabArgs& Args)
+	{
+		return SNew(SDockTab)
+		.Label(LOCTEXT("ArtistToolsLauncher", "ArtistTools Launcher"))
+		.TabRole(ETabRole::NomadTab)
+		[
+			SNew(SArtistToolsLauncherWindow)
+		];
+	}))
+	.SetDisplayName(LOCTEXT("CalleesTabTitle", "Callees"))
+	.SetMenuType(ETabSpawnerMenuType::Hidden)
+	.SetIcon(FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(), "ArtistToolsEd.ArtistToolsLogo"));
+
+}
+
+void FMainMenuToolbar::UnregisterTabSpawners()
+{
+
+	FGlobalTabmanager::Get()->UnregisterTabSpawner("Launcher");
+}
 
 //中英文切换
 void FMainMenuToolbar::LangSwitcher()
 {
 	//中英文切换
-	if(UKismetInternationalizationLibrary::GetCurrentLanguage() == "zh-hans")
+	if(UKismetInternationalizationLibrary::GetCurrentLanguage() == "zh-Hans")
 	{
 		UKismetInternationalizationLibrary::SetCurrentLanguage("en",true);
 	}
 	else
 	{
-		UKismetInternationalizationLibrary::SetCurrentLanguage("zh-hans",true);
+		UKismetInternationalizationLibrary::SetCurrentLanguage("zh-Hans",true);
 	}
 }
 

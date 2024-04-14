@@ -37,6 +37,8 @@ FName FArtistToolsEdStyle::GetStyleSetName()
 
 const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
+const FVector2D Icon30x30(30.0f, 30.0f);
+const FVector2D Icon48x48(48.0f, 48.0f);
 
 TSharedRef< FSlateStyleSet > FArtistToolsEdStyle::Create()
 {
@@ -52,6 +54,9 @@ TSharedRef< FSlateStyleSet > FArtistToolsEdStyle::Create()
 	Style->Set("ArtistToolsEd.Github", new IMAGE_BRUSH_SVG(TEXT("Icons/Github"), Icon20x20));
 	Style->Set("ArtistToolsEd.RestartEditor", new IMAGE_BRUSH_SVG(TEXT("Icons/Restart"), Icon20x20));
 	Style->Set("ArtistToolsEd.About", new IMAGE_BRUSH_SVG(TEXT("Icons/About"), Icon20x20));
+	Style->Set("ArtistToolsEd.Bbackground", new IMAGE_BRUSH_SVG(TEXT("Sprites/Bbackground"), Icon20x20));
+	Style->Set("ArtistToolsEd.File", new IMAGE_BRUSH_SVG(TEXT("Icons/file"), Icon30x30));
+	
 	return Style;
 }
 

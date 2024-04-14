@@ -29,5 +29,6 @@ public:
 
 	TSharedPtr< FUICommandInfo > LanguageCN;
 	TSharedPtr< FUICommandInfo > LanguageEN;
-	
+
+	TSharedPtr< FUICommandInfo > Launcher;
 };

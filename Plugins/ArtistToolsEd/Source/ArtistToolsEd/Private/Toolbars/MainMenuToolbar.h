@@ -19,11 +19,17 @@ public:
 	//绑定指令
 	void BindCommands();
 	
-	
+	//切花语言。
 	static void LangSwitcher();
 	
 private:
 	void OnToolBarClick();
+
+	void OpenLauncher();
+
+	void RegisterTabSpawners();
+
+	void UnregisterTabSpawners();
 	
 	//构建下拉菜单.
 	TSharedRef<SWidget> GenerateComboMenu() const;
