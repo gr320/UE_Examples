@@ -12,4 +12,6 @@ public class UE_ExamplesEditorTarget : TargetRules
 
 		ExtraModuleNames.AddRange( new string[] { "UE_Examples" } );
 	}
+
+	
 }
