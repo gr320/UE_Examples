@@ -46,7 +46,7 @@ public:
 	bool bUseCache = false;
 	/*资源CDN地址*/
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Patching");
-	FString BaseCdnUrl = "";
+	FString BaseCdnUrl = "http://127.0.0.1/paks";
 
 
 	//存储已经下实在的Pak文件

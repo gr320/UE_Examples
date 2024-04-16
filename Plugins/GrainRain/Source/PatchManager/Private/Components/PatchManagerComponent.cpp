@@ -97,7 +97,7 @@ void UPatchManagerComponent::DownloadRemotePakFile(const FString& InPakId)
 	HttpRequest->SetVerb("GET");
 	HttpRequest->SetURL(FPaths::Combine(BaseCdnUrl,InPakId));
 	//HttpRequest->SetHeader("referer","one.heartdub.cn");
-
+	UE_LOG(LogTemp, Display, TEXT("Pak Remote url: %s"), *HttpRequest->GetURL());
 	
 	HttpRequest->OnProcessRequestComplete().BindLambda([this,path, InPakId](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful) {
 		if (bWasSuccessful && Response->GetResponseCode() == EHttpResponseCodes::Ok)
