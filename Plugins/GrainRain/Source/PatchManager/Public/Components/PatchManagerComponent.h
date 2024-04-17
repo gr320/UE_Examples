@@ -34,8 +34,7 @@ public:
 
 
 public:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Patching");
-	FString PluginMountPoint="ArtResources";
+
 	
 	///资产保存路径.
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Patching");
@@ -78,10 +77,16 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Patching")
 	void DownloadRemotePakFile(const FString& InPakId);
-
-
+	UFUNCTION(BlueprintCallable, Category = "Patching")
+	TArray<FString> MountPakFile(const FString& InPakId);
+	UFUNCTION(BlueprintCallable, Category = "Patching")
+	void UnmountAllPakFiles();
 	// 在文件块下载进程完成时调用
     void OnDownloadComplete(const FString& PakID,bool bSucceeded) const;
     // ChunkDownloader完成挂载文件块时调用
     void OnMountComplete(const FString& PakID,bool bSucceeded) const;
+
+	
 };
+
+
