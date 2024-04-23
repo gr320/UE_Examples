@@ -6,6 +6,7 @@
 #include "HttpModule.h"
 #include "IPlatformFilePak.h"
 #include "Animation/SkeletalMeshActor.h"
+#include "Engine/StaticMeshActor.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -35,7 +36,7 @@ void UPatchManagerComponent::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("InnerPlatformFile: %s"), InnerPlatformFile->GetName());
 	//初始化PakPlatformFile 
 	PakPlatformFile = MakeShareable(new FPakPlatformFile());
-	PakPlatformFile.Get()->Initialize(&FPlatformFileManager::Get().GetPlatformFile(), TEXT(""));// 设置空字符串路径以使用默认的Pak搜索路径
+	PakPlatformFile.Get()->Initialize(InnerPlatformFile, TEXT(""));// 设置空字符串路径以使用默认的Pak搜索路径
 	//RegisterMountPoint(PluginMountPoint);
 	PaksSavePath = FPaths::Combine(FPaths::ProjectPersistentDownloadDir(),"/Game","Paks");
 
@@ -149,7 +150,6 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 	//挂载资产...
 	if (bMountSuccess)
 	{
-		MountedPaks.Add(*PakFilePath,MountPoint);
 		//带上/Mod/作为搜索路径，避免默认从/Game/中搜索
 		TArray<FString> AssetList;
 		PakFile->FindPrunedFilesAtPath(AssetList, *PakFile->GetMountPoint(), true, false, true);
@@ -179,7 +179,7 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 					OutMountedPaths.Add(NewFileName);
 
 					UE_LOG(LogTemp, Display, TEXT("[MountPak]FileName:%s,objname:%s"), *NewFileName,*obj->GetClass()->GetName());
-					/*if(obj->IsA<UStaticMesh>())
+					if(obj->IsA<UStaticMesh>())
 					{
 						AStaticMeshActor* Mesh = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(),
 							FVector(0,0,0), FRotator::ZeroRotator);
@@ -203,7 +203,21 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 						{
 							UE_LOG(LogTemp,Display,TEXT("-------Material Name:%s"),*mat->GetName())
 						}
-					}*/
+					}else if (obj->IsA<UWorld>())
+					{
+						bool bOutSuccess = false;
+	
+						//ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), obj, FVector::Zero(), FRotator::ZeroRotator, bOutSuccess);
+						if (bOutSuccess)
+						{
+							UE_LOG(LogTemp, Warning, TEXT("子关卡加载成功!"));
+						}else
+						{
+							UE_LOG(LogTemp, Warning, TEXT("子关卡加载失败!"));
+						}
+
+							//LevelObjs.Add(obj);
+					}
 				
 					//UE_LOG(LogTemp, Warning, TEXT("[MountPak]FileName:%s,objname:%s"), *NewFileName,*obj->GetClass()->GetName());
 				}
@@ -220,6 +234,70 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 	OnMountComplete(InPakId,bMountSuccess);
 	return OutMountedPaths;
 	
+}
+
+
+
+
+void UPatchManagerComponent::TestLoadPak(FString InPakId)
+{
+	FPlatformFileManager::Get().SetPlatformFile(*PakPlatformFile.Get());
+
+
+	const FString* PakFilePath = DownloadedPaks.Find(InPakId);
+	TArray<FString> OutMountedPaths;
+
+	
+	if(PakFilePath==nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[MountRemotePakFile]Pak not downloaded: %s"), *InPakId);
+		return;
+	}
+ 
+	FPakFile* TmpPak = new FPakFile(PakPlatformFile.Get(), **PakFilePath, false);
+	FString PakMountPoint = TmpPak->GetMountPoint();
+	int32 Pos2 = PakMountPoint.Find("Content/");
+	FString NewMountPoint = PakMountPoint.RightChop(Pos2);
+	NewMountPoint = FPaths::ProjectDir() + NewMountPoint;
+	//FString NewMountPoint = "../../../DBJTest/Content/DLC/";
+ 
+	TmpPak->SetMountPoint(*NewMountPoint);
+ 
+	if (PakPlatformFile->Mount(**PakFilePath, 1, *NewMountPoint))
+	{
+		TArray<FString> FoundFilenames;
+		TmpPak->FindPrunedFilesAtPath(FoundFilenames, *TmpPak->GetMountPoint(), true, false, false);
+ 
+		if (FoundFilenames.Num() > 0)
+		{
+			for (FString& Filename : FoundFilenames)
+			{
+				if (Filename.EndsWith(TEXT(".uasset")))
+				{
+					FString NewFileName = Filename;
+					NewFileName.RemoveFromEnd(TEXT(".uasset"));
+					int32 Pos = NewFileName.Find("/Content/");
+					NewFileName = NewFileName.RightChop(Pos + 8);
+					NewFileName = "/Game" + NewFileName;
+ 
+					UObject* LoadedObj = StaticLoadObject(UObject::StaticClass(), NULL, *NewFileName);
+ 
+					UStaticMesh* SM = Cast<UStaticMesh>(LoadedObj);
+					if (SM)
+					{
+						AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), FVector(0,0,460), FRotator(0,0,0) );
+						MeshActor->SetMobility(EComponentMobility::Movable);
+						MeshActor->GetStaticMeshComponent()->SetStaticMesh(SM);
+						break;
+					}
+				}
+			}
+		}
+	}
+ 
+ 
+	FPlatformFileManager::Get().SetPlatformFile(*InnerPlatformFile);
+ 
 }
 
 void UPatchManagerComponent::UnmountAllPakFiles()

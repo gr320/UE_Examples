@@ -42,7 +42,7 @@ public:
 	//是否使用缓存的pak文件
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Patching");
-	bool bUseCache = false;
+	bool bUseCache = true;
 	/*资源CDN地址*/
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Patching");
 	FString BaseCdnUrl = "http://127.0.0.1/paks";
@@ -79,6 +79,8 @@ public:
 	void DownloadRemotePakFile(const FString& InPakId);
 	UFUNCTION(BlueprintCallable, Category = "Patching")
 	TArray<FString> MountPakFile(const FString& InPakId);
+	UFUNCTION(BlueprintCallable, Category = "Patching")
+	void TestLoadPak(FString InPakId);
 	UFUNCTION(BlueprintCallable, Category = "Patching")
 	void UnmountAllPakFiles();
 	// 在文件块下载进程完成时调用
