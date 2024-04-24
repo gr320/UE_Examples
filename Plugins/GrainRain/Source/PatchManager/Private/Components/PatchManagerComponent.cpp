@@ -152,7 +152,7 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 	{
 		//带上/Mod/作为搜索路径，避免默认从/Game/中搜索
 		TArray<FString> AssetList;
-		PakFile->FindPrunedFilesAtPath(AssetList, *PakFile->GetMountPoint(), true, false, true);
+		PakFile->FindPrunedFilesAtPath(*PakFile->GetMountPoint(), AssetList, true, false, true);
 		for (FString itemPath : AssetList)
 		{
 			if (itemPath.EndsWith(TEXT(".uasset"))||itemPath.EndsWith(TEXT(".umap")))
@@ -161,15 +161,10 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 				NewFileName.RemoveFromEnd(TEXT(".uasset"));
 				NewFileName.RemoveFromEnd(TEXT(".umap"));
 				//UE_LOG(LogTemp,Display,TEXT("[MountRemotePakFile]OldFileName:%s"),*NewFileName);
-
-				
 				int Pos = NewFileName.Find("/Content/");
 				NewFileName = NewFileName.RightChop(Pos + 8);
-				
-				OutMountedPaths.Add(NewFileName);
-				
 				NewFileName = "/Game"+NewFileName;
-				
+				OutMountedPaths.Add(NewFileName);
 				//NewFileName.ReplaceInline(*MountPoint, *FString::Format(TEXT("/{0}/"),{PluginMountPoint}));
 				//UE_LOG(LogTemp,Display,TEXT("[MountPak]NewFileName:%s"),*NewFileName);
 				
@@ -266,7 +261,7 @@ void UPatchManagerComponent::TestLoadPak(FString InPakId)
 	if (PakPlatformFile->Mount(**PakFilePath, 1, *NewMountPoint))
 	{
 		TArray<FString> FoundFilenames;
-		TmpPak->FindPrunedFilesAtPath(FoundFilenames, *TmpPak->GetMountPoint(), true, false, false);
+		TmpPak->FindPrunedFilesAtPath(*TmpPak->GetMountPoint(),FoundFilenames , true, false, false);
  
 		if (FoundFilenames.Num() > 0)
 		{
@@ -296,7 +291,7 @@ void UPatchManagerComponent::TestLoadPak(FString InPakId)
 	}
  
  
-	FPlatformFileManager::Get().SetPlatformFile(*InnerPlatformFile);
+	//FPlatformFileManager::Get().SetPlatformFile(*InnerPlatformFile);
  
 }
 
