@@ -42,7 +42,21 @@ public class ArtistToolsEd : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore", 
+				"SlateCore",
+				"UATHelper",
+				"TurnkeySupport", 
+				"DerivedDataCache",
+				"DesktopPlatform",
+				"DeveloperToolSettings",
+				"DeveloperSettings",
+				"ProjectTargetPlatformEditor", 
+				"TurnkeyIO",
+				"LauncherServices", 
+				"GameProjectGeneration",
+				"Analytics",
+				"AnimNodes",
+				"AnimGraph",
+				"BlueprintGraph",
 				
 				// ... add private dependencies that you statically link with here ...	
 			}

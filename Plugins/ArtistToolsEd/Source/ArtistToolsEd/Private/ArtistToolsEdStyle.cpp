@@ -56,6 +56,7 @@ TSharedRef< FSlateStyleSet > FArtistToolsEdStyle::Create()
 	Style->Set("ArtistToolsEd.About", new IMAGE_BRUSH_SVG(TEXT("Icons/About"), Icon20x20));
 	Style->Set("ArtistToolsEd.Bbackground", new IMAGE_BRUSH_SVG(TEXT("Sprites/Bbackground"), Icon20x20));
 	Style->Set("ArtistToolsEd.File", new IMAGE_BRUSH_SVG(TEXT("Icons/file"), Icon30x30));
+	Style->Set("ArtistToolsEd.PackageTools", new IMAGE_BRUSH_SVG(TEXT("Icons/file"), Icon30x30));
 	
 	return Style;
 }

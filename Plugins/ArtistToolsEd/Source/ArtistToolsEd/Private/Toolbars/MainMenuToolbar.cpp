@@ -2,6 +2,7 @@
 
 #include "ArtistToolsEdCommands.h"
 #include "ISettingsModule.h"
+#include "PackageTools.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "ToolMenus.h"
 #include "Kismet/KismetInternationalizationLibrary.h"
@@ -30,6 +31,9 @@ void FMainMenuToolbar::Initialize()
     // Owner will be used for cleanup in call to UToolMenus::UnregisterOwner
 	FToolMenuOwnerScoped OwnerScoped(this);
 
+
+	PackageTools = MakeShared<FPackageTools>();
+	
 	RegisterTabSpawners();
 
 	
@@ -143,6 +147,14 @@ void FMainMenuToolbar::BindCommands()
 	//切换语言.
     CommandList->MapAction(FArtistToolsEdCommands::Get().SwitchLanguage, FExecuteAction::CreateStatic(FMainMenuToolbar::LangSwitcher), FCanExecuteAction());
 	
+	//打包Windows
+	CommandList->MapAction(FArtistToolsEdCommands::Get().PackageTools, FExecuteAction::CreateLambda([this]
+	{
+		//重启编辑器
+		PackageTools->OnPackageProject();
+	}), FCanExecuteAction());
+	
+
 	
 	CommandList->MapAction(FArtistToolsEdCommands::Get().LanguageEN,
 		FUIAction(FExecuteAction::CreateLambda([]()
@@ -252,8 +264,12 @@ TSharedRef<SWidget> FMainMenuToolbar::GenerateComboMenu() const
 		}),false,FSlateIcon(FArtistToolsEdStyle::GetStyleSetName(),"ArtistToolsEd.Language"));
 	
 	//MenuBuilder.AddMenuSeparator();//添加一条横线
-	
+
+	MenuBuilder.AddMenuEntry(Commands.PackageTools);
 	MenuBuilder.EndSection();
+
+
+
 	
 	//Section Settings
 	MenuBuilder.BeginSection(ExtensionHook, TAttribute<FText>(FText::FromString("Settings")));

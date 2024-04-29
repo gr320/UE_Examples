@@ -23,6 +23,11 @@
 			"Name": "PatchManager",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "AnimNodes",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	]
 }

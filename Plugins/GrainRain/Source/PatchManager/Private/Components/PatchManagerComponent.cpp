@@ -134,7 +134,7 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 	
 	if(PakFilePath==nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[MountRemotePakFile]Pak not downloaded: %s"), *InPakId);
+		UE_LOG(LogTemp, Error, TEXT("[MountRemotePakFile]Pak not downloaded: %s"), *InPakId);
 		return OutMountedPaths;
 	}
 	// 切换到 pak平台
@@ -142,17 +142,19 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 
 	// 获取pak文件
 	FPakFile* PakFile = new FPakFile(PakPlatformFile.Get(), **PakFilePath, false);
-	
-	FString MountPoint(*PakFile->GetMountPoint()); 
+
+	FString MountPoint(*PakFile->GetMountPoint());
+
 	UE_LOG(LogTemp, Display, TEXT("[MountRemotePakFile]Default Mount Point: %s"), *MountPoint);
 	MountPoint = FPaths::Combine(FPaths::ProjectDir(),  "Content");
+
 	auto bMountSuccess=PakPlatformFile->Mount(**PakFilePath, 0,*MountPoint);
 	//挂载资产...
 	if (bMountSuccess)
 	{
 		//带上/Mod/作为搜索路径，避免默认从/Game/中搜索
 		TArray<FString> AssetList;
-		PakFile->FindPrunedFilesAtPath(*PakFile->GetMountPoint(), AssetList, true, false, true);
+		PakFile->FindPrunedFilesAtPath(AssetList, *PakFile->GetMountPoint(), true, false, true);
 		for (FString itemPath : AssetList)
 		{
 			if (itemPath.EndsWith(TEXT(".uasset"))||itemPath.EndsWith(TEXT(".umap")))
@@ -160,18 +162,24 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 				FString NewFileName = itemPath;
 				NewFileName.RemoveFromEnd(TEXT(".uasset"));
 				NewFileName.RemoveFromEnd(TEXT(".umap"));
-				//UE_LOG(LogTemp,Display,TEXT("[MountRemotePakFile]OldFileName:%s"),*NewFileName);
+
 				int Pos = NewFileName.Find("/Content/");
 				NewFileName = NewFileName.RightChop(Pos + 8);
 				NewFileName = "/Game"+NewFileName;
-				OutMountedPaths.Add(NewFileName);
-				//NewFileName.ReplaceInline(*MountPoint, *FString::Format(TEXT("/{0}/"),{PluginMountPoint}));
-				//UE_LOG(LogTemp,Display,TEXT("[MountPak]NewFileName:%s"),*NewFileName);
 				
+
+				OutMountedPaths.Add(NewFileName);
+
 				auto obj =LoadObject<UObject>(nullptr, *NewFileName);
 				if(obj!=nullptr)
 				{
-					OutMountedPaths.Add(NewFileName);
+					UE_LOG(LogTemp,Display,TEXT("-------Material Name:%s"),*obj->GetName())
+				}
+
+				
+				if(obj!=nullptr)
+				{
+					//OutMountedPaths.Add(NewFileName);
 
 					UE_LOG(LogTemp, Display, TEXT("[MountPak]FileName:%s,objname:%s"), *NewFileName,*obj->GetClass()->GetName());
 					if(obj->IsA<UStaticMesh>())
@@ -198,34 +206,33 @@ TArray<FString> UPatchManagerComponent::MountPakFile(const FString& InPakId)
 						{
 							UE_LOG(LogTemp,Display,TEXT("-------Material Name:%s"),*mat->GetName())
 						}
-					}else if (obj->IsA<UWorld>())
+					}
+					else if (obj->IsA<UWorld>())
 					{
 						bool bOutSuccess = false;
-	
 						//ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), obj, FVector::Zero(), FRotator::ZeroRotator, bOutSuccess);
 						if (bOutSuccess)
 						{
 							UE_LOG(LogTemp, Warning, TEXT("子关卡加载成功!"));
-						}else
+						}
+						else
 						{
 							UE_LOG(LogTemp, Warning, TEXT("子关卡加载失败!"));
 						}
 
-							//LevelObjs.Add(obj);
 					}
-				
 					//UE_LOG(LogTemp, Warning, TEXT("[MountPak]FileName:%s,objname:%s"), *NewFileName,*obj->GetClass()->GetName());
 				}
-				else
-				{
+				////else
+				//{
 					//UE_LOG(LogTemp, Warning, TEXT("[MountPak]FileName:%s,objname is null"), *NewFileName);
-				}
+				//}
 			}
 		}
 	}
 
 	// 切换到 pak平台
-	FPlatformFileManager::Get().SetPlatformFile(*InnerPlatformFile);
+	//FPlatformFileManager::Get().SetPlatformFile(*InnerPlatformFile);
 	OnMountComplete(InPakId,bMountSuccess);
 	return OutMountedPaths;
 	

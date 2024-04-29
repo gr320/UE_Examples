@@ -35,5 +35,7 @@ private:
 	TSharedRef<SWidget> GenerateComboMenu() const;
 	
 	const TSharedRef<FUICommandList> CommandList;
+
+	TSharedPtr<class FPackageTools> PackageTools;
 	
 };

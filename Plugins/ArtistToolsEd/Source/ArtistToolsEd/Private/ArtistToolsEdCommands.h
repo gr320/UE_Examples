@@ -31,4 +31,5 @@ public:
 	TSharedPtr< FUICommandInfo > LanguageEN;
 
 	TSharedPtr< FUICommandInfo > Launcher;
+	TSharedPtr< FUICommandInfo > PackageTools;
 };

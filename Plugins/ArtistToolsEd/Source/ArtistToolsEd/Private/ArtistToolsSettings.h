@@ -66,4 +66,8 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = ArtistToolsEditor)
 	TEnumAsByte<ELanguage> Language = ELanguage::Chinese;
 	TMap<ELanguage, FString>LanguageMap;
+
+	//项目打包地址.
+	UPROPERTY(config, EditAnywhere, Category = "HeartDub|Package")
+	FDirectoryPath BuildPath;
 };

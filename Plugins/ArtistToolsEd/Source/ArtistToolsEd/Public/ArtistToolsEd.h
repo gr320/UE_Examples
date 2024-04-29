@@ -31,6 +31,10 @@ private:
 	
 
 private:
+
+	
+
+	
 	TSharedPtr<class FMainMenuToolbar> MainMenuToolbar;
 	TSharedPtr<class FUICommandList> PluginCommands;
 	//引擎初始化完毕

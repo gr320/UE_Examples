@@ -38,6 +38,7 @@ public class GrainRain : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"AnimNodes",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
