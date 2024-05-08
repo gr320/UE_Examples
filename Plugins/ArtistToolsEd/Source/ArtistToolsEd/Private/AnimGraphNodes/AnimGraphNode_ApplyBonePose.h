@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS(meta = (Keywords = "ApplyBonePose"))
+UCLASS(meta = (Keywords = "BlendFadeIn"))
 class ARTISTTOOLSED_API UAnimGraphNode_ApplyBonePose : public UAnimGraphNode_SkeletalControlBase
 {
 	GENERATED_BODY()

@@ -48,13 +48,15 @@ void FAnimNode_BlendFadeIn::EvaluateSkeletalControl_AnyThread(FComponentSpacePos
 			}
 			else
 			{
+
+				
 				FCompactPoseBoneIndex compactPoseBoneToModify = boneToModify.GetCompactPoseIndex(boneContainer);
 				if (compactPoseBoneToModify != INDEX_NONE && PoseTransforms.Transforms.Num()>i)
 				{
 					//获取基于SkeletalComponent的Transform信息.
 					FTransform newBoneTM = Output.Pose.GetComponentSpaceTransform(compactPoseBoneToModify);
 					//转化为BoneSpace 
-					FAnimationRuntime::ConvertCSTransformToBoneSpace(componentTransform, Output.Pose, newBoneTM, compactPoseBoneToModify, /*BCS_ParentBoneSpace*/BCS_ParentBoneSpace);
+					//FAnimationRuntime::ConvertCSTransformToBoneSpace(componentTransform, Output.Pose, newBoneTM, compactPoseBoneToModify, /*BCS_ParentBoneSpace*/BCS_ParentBoneSpace);
 					//newBoneTM.SetTranslation(PoseTransforms.Transforms[i].GetTranslation());//
 				
 					newBoneTM.SetRotation(PoseTransforms.Transforms[i].GetRotation());//
@@ -62,6 +64,8 @@ void FAnimNode_BlendFadeIn::EvaluateSkeletalControl_AnyThread(FComponentSpacePos
 					//BoneSpace 转化为SkeletalComponent.
 					FAnimationRuntime::ConvertBoneSpaceTransformToCS(componentTransform, Output.Pose, newBoneTM, compactPoseBoneToModify, /*BCS_ParentBoneSpace*/BCS_ParentBoneSpace);
 					Output.Pose.SetComponentSpaceTransform(compactPoseBoneToModify, newBoneTM);
+
+					UE_LOG(LogTemp,Display,TEXT("[Anim] %s:%s"),*name.ToString(),*newBoneTM.ToString());
 				}
 			
 			}

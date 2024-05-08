@@ -5,12 +5,12 @@
 
 FText UAnimGraphNode_ApplyBonePose::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	return FText::FromString("Apply Bones Node");
+	return FText::FromString("Blend FadeIn Node");
 }
 
 FText UAnimGraphNode_ApplyBonePose::GetTooltipText() const
 {
-	return FText::FromString("ApplyBonePoseTooltip");
+	return FText::FromString("BlendFadeInTooltip");
 }
 
 

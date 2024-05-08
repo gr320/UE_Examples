@@ -16,7 +16,7 @@ struct ANIMNODES_API FAnimNode_BlendFadeIn : public FAnimNode_SkeletalControlBas
 	
 	// Input link
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HeartDub, meta = (PinShownByDefault))
-	FBoneTransforms PoseTransforms;
+	FCustomBoneTransforms PoseTransforms;
 
 
 	

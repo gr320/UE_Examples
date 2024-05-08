@@ -26,10 +26,12 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable,CallInEditor)
-	void Init(USkeletalMeshComponent* InSkeletalMeshComponent);
+	void Init(USkeletalMeshComponent* InSkeletalMeshComponent,USkeletalMeshComponent* InPoseComponent);
 	UFUNCTION(BlueprintCallable,CallInEditor)
-	void CopyPose(FBoneTransforms& OutBoneTransforms);
+	void CopyPose(FCustomBoneTransforms& OutBoneTransforms);
 
 public:
 	USkeletalMeshComponent* SkeletalMeshComponent;
+	
+	USkeletalMeshComponent* PoseComponent;
 };

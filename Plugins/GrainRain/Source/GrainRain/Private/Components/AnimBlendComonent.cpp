@@ -3,6 +3,7 @@
 
 #include "Components/AnimBlendComonent.h"
 
+#include "TestAnimInstance.h"
 #include "Animation/AnimSingleNodeInstance.h"
 #include "Data/BoneTransforms.h"
 
@@ -37,13 +38,15 @@ void UAnimBlendComonent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
-void UAnimBlendComonent::Init(USkeletalMeshComponent* InSkeletalMeshComponent)
+void UAnimBlendComonent::Init(USkeletalMeshComponent* InSkeletalMeshComponent,USkeletalMeshComponent* InPoseComponent)
 {
     SkeletalMeshComponent  = InSkeletalMeshComponent;
+	PoseComponent = InPoseComponent;
+	
 	
 }
 
-void UAnimBlendComonent::CopyPose(FBoneTransforms& OutBoneTransforms)
+void UAnimBlendComonent::CopyPose(FCustomBoneTransforms& OutBoneTransforms)
 {
 	TArray<FName> BoneNames;
 	SkeletalMeshComponent->GetBoneNames(BoneNames);
@@ -79,21 +82,28 @@ void UAnimBlendComonent::CopyPose(FBoneTransforms& OutBoneTransforms)
 	AnimSequence->GetBonePose(AnimPoseData,ExtractionContext,true);
 
 
-	
-	
+	UTestAnimInstance* AnimInst = Cast<UTestAnimInstance>(PoseComponent->GetAnimInstance());
+	if (AnimInst==nullptr)
+	{
+		return;
+	}
+	AnimInst->TestBoneTransforms.Names.Reset();
+	AnimInst->TestBoneTransforms.Transforms.Reset();
 	for (int i = 0; i < BoneNames.Num(); ++i)
 	{
 		int32 boneIndex = SkeletalMeshComponent->GetSkeletalMeshAsset()->GetRefSkeleton().FindBoneIndex(BoneNames[i]);
 		FName boneName = SkeletalMeshComponent->GetSkeletalMeshAsset()->GetRefSkeleton().GetBoneName(boneIndex);
+
+		AnimInst->TestBoneTransforms.Names.Add(boneName.ToString());
 		//BoneContainer.GetPoseBoneIndexForBoneName(boneName);
 		FCompactPoseBoneIndex CompactIndex(boneIndex);
-
 		//Pose.GetRefPose(CompactIndex)
 		FTransform transform = Pose.GetRefPose(CompactIndex);
-		
 		OutBoneTransforms.Transforms.Add(transform);
 		OutBoneTransforms.Names.Add(boneName.ToString());
-		UE_LOG(LogTemp,Display,TEXT("%s"),*transform.GetLocation().ToString())
+
+		AnimInst->TestBoneTransforms.Transforms.Add(transform);
+		//UE_LOG(LogTemp,Display,TEXT("%s"),*transform.GetLocation().ToString())
 	}
 
 	//OutBoneTransforms.Transforms =AnimPoseData.GetPose().GetBones();
