@@ -65,7 +65,12 @@ void FAnimNode_BlendFadeIn::EvaluateSkeletalControl_AnyThread(FComponentSpacePos
 					FAnimationRuntime::ConvertBoneSpaceTransformToCS(componentTransform, Output.Pose, newBoneTM, compactPoseBoneToModify, /*BCS_ParentBoneSpace*/BCS_ParentBoneSpace);
 					Output.Pose.SetComponentSpaceTransform(compactPoseBoneToModify, newBoneTM);
 
-					UE_LOG(LogTemp,Display,TEXT("[Anim] %s:%s"),*name.ToString(),*newBoneTM.ToString());
+					/*if(name=="RightHand")
+					{
+						UE_LOG(LogTemp,Display,TEXT("[Anim] %s:%s"),*name.ToString(),*PoseTransforms.Transforms[i].ToString());
+					}*/
+					
+					
 				}
 			
 			}

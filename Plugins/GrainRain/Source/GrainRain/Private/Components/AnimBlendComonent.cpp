@@ -95,14 +95,14 @@ void UAnimBlendComonent::CopyPose(FCustomBoneTransforms& OutBoneTransforms)
 		FName boneName = SkeletalMeshComponent->GetSkeletalMeshAsset()->GetRefSkeleton().GetBoneName(boneIndex);
 
 		AnimInst->TestBoneTransforms.Names.Add(boneName.ToString());
-		//BoneContainer.GetPoseBoneIndexForBoneName(boneName);
 		FCompactPoseBoneIndex CompactIndex(boneIndex);
-		//Pose.GetRefPose(CompactIndex)
-		FTransform transform = Pose.GetRefPose(CompactIndex);
+		FTransform transform = SkeletalMeshComponent->GetBoneTransform(boneName,RTS_ParentBoneSpace);
 		OutBoneTransforms.Transforms.Add(transform);
 		OutBoneTransforms.Names.Add(boneName.ToString());
 
 		AnimInst->TestBoneTransforms.Transforms.Add(transform);
+
+	
 		//UE_LOG(LogTemp,Display,TEXT("%s"),*transform.GetLocation().ToString())
 	}
 
